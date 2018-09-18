@@ -1,0 +1,834 @@
+01. 自动化构建工具webpack_入门介绍
+
+https://github.com/webpack/webpack/releases
+
+https://www.webpackjs.com/
+
+
+Webpack快速入门教程  1.0版本
+
+webpack4快速入门教程 4.0版本  2与3差异不大
+
+
+
+grunt、gulp、webpack 都可以成为项目构建工具
+
+但 webpack  又可称为模块打包器
+
+webpack 认为所有的文件都是模块 它认为HTML不算模块 是本就应该有的结构
+
+
+https://www.webpackjs.com/concepts/
+
+
+概念
+
+本质上，webpack 是一个现代 JavaScript 应用程序的静态模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 bundle。
+
+
+从 webpack v4.0.0 开始，可以不用引入一个配置文件。然而，webpack 仍然还是高度可配置的。在开始前你需要先理解四个核心概念：
+
+入口(entry)
+输出(output)
+loader
+插件(plugins)
+
+
+
+02. 自动化构建工具webpack_打包js,json文件
+
+
+
+
+
+
+创建  03_Webpack3 项目
+
+
+右键   03_Webpack3 --  new  file name: package.json
+
+
+参考 https://blog.zfanw.com/webpack-tutorial/
+
+
+npm  install --save-dev  webpack  webpack-cli  //局部安装
+
+
+
+右键   03_Webpack3 --  new  directory  name: src
+
+右键   src --  new  directory  name: js
+
+右键   js --  new  file name: entry.js
+
+加入
+
+document.write("entry.js is work");
+
+
+cd    03_Webpack3
+
+cmd
+
+
+npx webpack    src/js/entry.js -o dist/js/bundle.js --mode development
+npx就是执行node_modeiles下的.bin下的文件webpack
+
+说明:npx是一个工具，旨在提高从npm注册表使用软件包的体验 ，npm使得它非常容易地安装和管理托管在注册表上的依赖项，npx使得使用CLI工具和其他托管在注册表。
+
+
+打包成功
+
+
+time:  打包花费的时间
+
+asset: 静态资源  官网箭头 图片 右侧执行的资源
+
+bundle.js 发现打包后的文件大小 比原文件大小大了
+
+
+
+但出现黄色警告。这是 webpack 4 引入的模式，包括 development、production、none 三个值，我们不传入值的话，默认使用 production。
+
+
+npx webpack    src/js/entry.js  dist/js/bundle.js  --mode development
+
+
+如果不加参数  --mode development   可以在 webpack.config.js
+
+中的  module.exports = {
+
+下面加入
+
+mode: "production", // "production" | "development" | "none"
+
+即可
+
+
+
+查看  bundle.js  发现会生成很多JS代码 在最下面发现是 自调函数
+
+/* 0 */    数组就一个元素
+
+
+
+右键   js --  new  file name: content.js
+
+加入
+
+export function fun(x) {
+  return x * x;
+}
+
+export function fun2(x) {
+  return x ** x;//幂运算符 几次方
+}
+
+
+
+打开   entry.js
+
+修改如下
+
+
+import {fun, fun2} from './content';
+
+document.write("entry.js is work");
+document.write('<br />' + fun(3))
+document.write('<br />' + fun2(3))
+
+
+
+npx webpack    src/js/entry.js -o dist/js/bundle.js
+
+
+查看  bundle.js  发现会生成很多JS代码 在最下面发现是 自调函数
+
+/* 0 */    数组就一个元素
+
+/* 1 */    是引入的模块
+
+引入一个几个文件，就有几个函数
+
+合并的好处是把多个文件合并成一个  浏览器只需发送一个请求即可
+
+
+右键  dist  ---  new  file  name: index.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script type="text/javascript" src="js/bundle.js"></script></body>
+</html>
+
+
+运行
+
+
+
+右键   src --  new  directory  name: json
+
+右键   json --  new  file name: data.json
+
+加入
+
+{
+  "name": "Tom",
+  "age": 12
+}
+
+
+打开  entry.js
+
+加入
+
+import data from '../json/data.json';//只有.js扩展名不用写
+
+document.write('<br />' + JSON.stringify(data));
+
+
+
+npx webpack    src/js/entry.js -o dist/js/bundle.js
+
+
+查看   bundle.js
+
+
+03. 自动化构建工具webpack_config配置文件说明
+
+
+https://www.webpackjs.com/guides/getting-started/#%E4%BD%BF%E7%94%A8%E4%B8%80%E4%B8%AA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6
+
+
+右键   03_Webpack3 --  new  file name:webpack.config.js
+
+
+const path = require('path');
+
+module.exports = {
+  entry: './src/js/entry.js',//入口文件的配置
+  output: {                  //出口/输出的配置
+    filename: 'bundle.js',   //输出的文件名
+    path: path.resolve(__dirname, 'dist/js/')
+  }
+};
+
+
+npx  webpack
+
+
+04. 自动化构建工具webpack_打包css文件
+
+
+打包css和图片文件
+
+    安装样式的loader
+
+    npm install css-loader style-loader --save-dev
+    npm install file-loader url-loader --save-dev
+
+	补充：url-loader是对象file-loader的上层封装，使用时需配合file-loader使用。
+
+
+右键   src --  new  directory  name:css
+
+右键   css --  new  file name: test.css
+
+加入
+
+
+body {
+  background: blue;
+}
+
+
+打开   entry.js
+
+加入   import '../css/test.css';
+
+
+
+webpack    样式表报错    因为 webpack 加载不了 css 模块
+
+
+
+
+https://www.webpackjs.com/loaders/css-loader/
+
+
+找到
+
+webpack.config.js
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      }
+    ]
+  }
+}
+
+
+打开  webpack.config.js
+
+在
+
+ entry: './src/js/entry.js',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist/js')
+  }
+
+下面加入
+
+,
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      }
+    ]
+  }
+
+
+webpack
+
+
+将    'css-loader'   注释掉
+
+
+webpack     报错了
+
+
+css-loader  负责加载CSS模块，转成js
+style-loader 把css打包扔进html文件
+
+
+将    'css-loader'   放开
+
+将    'style-loader',  注释掉
+
+将 dist/js  目录删除
+
+webpack
+
+
+不报错
+
+
+打开 index.html
+
+但页面没有样式
+
+
+将    'style-loader',  放开
+
+页面会有样式
+
+
+结论：
+
+  css-loader  只负责加载CSS模块 但无法将加载到的样式添加到页面中
+
+  style-loader  会将css-loader加载到的 动态样式加入到.html <style> 标签中
+
+
+
+05.自动化构建工具webpack_打包图片
+
+打开  test.css
+
+加入
+
+#box1{
+  width: 300px;
+  height: 300px;
+  background-image: url("../image/logo.jpg");
+}
+#box2{
+  width: 300px;
+  height: 300px;
+  background-image: url("../image/big.jpg");
+}
+
+
+将课件 image 目录添加到工程  src 中  一个大于 >8k  一个小于  <8k
+
+url-loader  可以实现把小于8k图片以base64字符串形式打包的js中
+
+打开  webpack.config.js
+
+在
+
+
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      }
+
+下面加入
+
+,
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192 //可以将小于8k图片以base64字符串形式打包的js中
+            }
+          }
+        ]
+      }
+
+
+
+补充：url-loader是对象file-loader的上层封装，使用时需配合file-loader使用。
+
+http://base64.xpcha.com/pic.html
+
+
+
+index.html
+
+加入
+
+<div id="box1"></div>
+<div id="box2"></div>
+
+
+
+
+webpack
+
+    查看   dist/js  下会生成如  ad3bbb39831c85a1736ea55a222f7fd1.jpg
+
+          少了一张 小于 8K 的图片
+
+    打开   bundle.js   搜索  data:image
+
+          把小于8k图片以base64字符串形式打包的js中
+
+
+运行    index.html   无法显示 大于 8k 的图片
+
+       通过 console 查询 报错找不到  ad3bbb39831c85a1736ea55a222f7fd1.jpg
+
+
+  现在    index.html  文件引入了 <script type="text/javascript" src="js/bundle.js"></script>
+
+
+       bundle.js   里面包含了  小于 8K 的图片  所以 index.html  可以引用到
+
+
+
+   这也是网上热议的 url-loader  打包图片问题
+
+    根据错误提示 是到 dist 目录下寻找   ad3bbb39831c85a1736ea55a222f7fd1.jpg
+
+
+
+解决方法1：
+
+    将  index.html  移动到 dist/js  目录中
+
+    但需要将  index.html 中的
+
+    <script type="text/javascript" src="js/bundle.js">
+
+    改为
+
+    <script type="text/javascript" src="bundle.js">
+
+
+
+运行    index.html   正常显示
+
+
+    是比较常用的使用方式
+
+
+
+
+解决方法2：
+
+    将  index.html  移动到 dist  目录中
+
+
+    将  index.html 中的
+
+    <script type="text/javascript" src="bundle.js">
+
+    改为
+
+    <script type="text/javascript" src="js/bundle.js">
+
+
+打开   webpack.config.js
+
+在        filename: 'bundle.js',
+
+下面加入   publicPath : 'js/',  //设置为index.html提供资源的路径,设置完后找所有的资源都会去当前目录下找 带有强制性。
+
+
+   即当找不到所需文件时候 可以去 js/  下面寻找
+
+
+
+      不推荐使用  会影响后面使用的热加载工具
+
+
+将  publicPath : 'dist/js/',   注释掉
+
+
+
+06. 自动化构建工具webpack_热加载实现
+
+
+自动编译打包
+
+   利用webpack开发服务器工具: webpack-dev-server
+
+
+   https://www.webpackjs.com/guides/development/#%E4%BD%BF%E7%94%A8-webpack-dev-server
+
+
+
+    下载
+
+         npm install --g webpack-dev-server
+
+         npm install --save-dev webpack-dev-server
+
+    将 index.html 移动到 项目根路径下
+
+
+cmd
+
+    webpack-dev-server
+
+
+   会开启服务器
+
+         并调用  webpack.config.js
+
+
+   打开   localhost:8080    列出了所有目录
+
+    webpack-dev-server 会把读到的数据 打包  在 webpack.config.js 中设置的   filename: 'bundle.js' 文件里
+    并放置到虚拟内存中
+
+        // webpack-dev-server 提供的 一个虚拟文件夹（在内存中，硬盘里找不到）
+        // 1.内存的速度会更快，提升编译速度
+        // 2.保护硬盘
+
+
+ 将 index.html 移动到 项目 dist 路径下
+
+
+    将  index.html 中的
+
+    <script type="text/javascript" src="js/bundle.js">
+
+    改为
+
+    <script type="text/javascript" src="bundle.js">
+
+
+
+webpack配置
+
+
+打开  webpack.config.js
+
+
+在
+
+module: {
+  }
+
+下面加入
+           ,
+	      devServer: {
+	        contentBase: 'dist/'  //webpack-dev-server默认服务于根路径下 index.html
+	      }
+
+
+以上配置告知 webpack-dev-server，在 localhost:8080 下建立服务，将 dist 目录下的文件，作为可访问文件。
+
+
+
+cmd
+
+    webpack-dev-server
+
+
+
+修改    test.css
+
+中的
+
+#box2{
+  width: 300px;
+  height: 300px;
+  background-image: url("../image/big.jpg");
+}
+
+
+为
+
+
+#box2{
+  width: 500px;
+  height: 500px;
+  background-image: url("../image/big.jpg");
+}
+
+
+
+打开 index.html
+
+        查看是否修改
+
+
+
+终止 ctrl+c
+
+
+
+cmd
+
+webpack-dev-server --open
+
+                                可以自动打开浏览器
+
+
+
+修改    test.css
+
+中的
+
+body {
+  background: blue;
+}
+
+为
+
+
+body {
+  background: red;
+}
+
+
+
+查看  index.html
+
+
+
+
+
+将
+
+
+将  publicPath : 'dist/js/',   放开
+
+
+删除 dist 下的 js目录
+
+
+终止 ctrl+c
+
+cmd
+
+webpack-dev-server --open
+
+
+
+查看  index.html    报错 找不到   bundle.js
+
+
+    将  index.html 中的
+
+    <script type="text/javascript" src="bundle.js">
+
+    改为
+
+    <script type="text/javascript" src="js/bundle.js">
+
+
+刷新页面又可以找到了
+
+
+
+将  publicPath : 'dist/js/',   注释掉
+
+
+
+    将  index.html 中的
+
+    <script type="text/javascript" src="js/bundle.js">
+
+    改为
+
+    <script type="text/javascript" src="bundle.js">
+
+
+将 index.html  移动到     03_Webpack3 目录下
+
+
+
+
+打开  webpack.config.js
+
+
+将
+
+	        contentBase: 'dist/'   注释掉
+
+
+
+终止 ctrl+c
+
+
+cmd
+
+
+webpack-dev-server --open
+
+
+
+将  index.html  重命名为  index2.html
+
+
+
+终止 ctrl+c
+
+cmd
+
+webpack-dev-server --open
+
+
+又列出  项目下的目录资源了
+
+
+
+原理  https://www.webpackjs.com/configuration/watch/
+
+     webpack 可以监听文件变化，当它们修改后会重新编译。
+
+     webpack-dev-server 里 Watch 模式默认开启。
+
+
+07. 自动化构建工具webpack_插件使用
+
+
+https://www.webpackjs.com/plugins/
+
+
+点击 左侧   HtmlWebpackPlugin
+
+
+常用的插件
+    * 使用html-webpack-plugin根据模板html生成引入script的页面
+    * 使用clean-webpack-plugin清除dist文件夹
+    * 使用uglifyjs-webpack-plugin压缩打包的js文件
+
+
+    下载
+
+    npm install --save-dev  html-webpack-plugin clean-webpack-plugin
+
+
+
+打开  webpack.config.js
+
+加入
+
+const HtmlWebpackPlugin = require('html-webpack-plugin'); //自动生成html文件的插件
+const CleanWebpackPlugin = require('clean-webpack-plugin'); //清除之前打包的文件
+
+
+
+在
+
+module: {
+     }
+
+下面加入
+
+,
+  plugins: [
+    new HtmlWebpackPlugin({template: './index.html'}),
+    new CleanWebpackPlugin(['dist']),
+  ]
+
+
+打开  index.html
+
+删除   <script type="text/javascript" src="bundle.js"></script>
+
+
+删除 dist 目录下的 所有文件
+
+
+cmd
+
+
+  webpack
+
+
+    查看 dist/js/index.html
+
+    会多加入    <script type="text/javascript" src="bundle.js"></script>
+
+
+  运行   index.html
+
+
+  删除  dist  目录
+
+
+cmd
+
+
+  webpack
+
+
+  https://www.webpackjs.com/  查看官网首页  打包所有的 资源  原理图
+
+
+  new HtmlWebpackPlugin({template: './index.html'}) 作用:
+
+  根据模板页 生成 index.html 并引入 打包后的  bundle.js 文件
+
+
+右键 dist --- new  file  name:test.js
+
+
+
+cmd
+
+
+  webpack
+
+          new CleanWebpackPlugin(['dist'])  作用:
+
+          先删除 dist 目录再重新生成
+
+
+
+
